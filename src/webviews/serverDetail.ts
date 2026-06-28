@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { HServer, HetznerClient } from '../api/hetzner';
 import { ServersProvider } from '../providers/serversProvider';
 import { generateNonce } from '../utils/nonce';
+import { isValidIpAddress } from '../utils/network';
 
 // Re-use a single panel per server id rather than opening duplicates
 const openPanels = new Map<number, ServerDetailPanel>();
@@ -73,8 +74,8 @@ export class ServerDetailPanel {
         break;
       case 'ssh': {
         const ip = this.server.public_net.ipv4?.ip ?? this.server.public_net.ipv6?.ip;
-        if (!ip) {
-          vscode.window.showErrorMessage('Server has no public IP address.');
+        if (!ip || !isValidIpAddress(ip)) {
+          vscode.window.showErrorMessage('Server has no valid public IP address.');
           return;
         }
         const term = vscode.window.createTerminal(`SSH: ${this.server.name}`);

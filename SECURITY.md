@@ -18,7 +18,7 @@ Please open a private security report via GitHub Security Advisories if availabl
 
 No active exceptions as of 2026-06-28.
 
-Audit snapshot for release preparation:
+Audit snapshot for release preparation (v0.4.6, 2026-06-28):
 - `npm audit`: 0 vulnerabilities
 - `npm audit --omit=dev`: 0 vulnerabilities
 

@@ -41,16 +41,22 @@ export class TokenManager {
   }
 
   async listProjects(): Promise<string[]> {
-    // SecretStorage doesn't support listing keys; we maintain a CSV index
+    // SecretStorage doesn't support listing keys; we maintain a serialized index
     const index = await this.secrets.get('hcloud.projectIndex');
     if (!index) return [];
-    return index.split(',').filter(Boolean);
+    try {
+      const parsed: unknown = JSON.parse(index);
+      return Array.isArray(parsed) ? parsed.filter((p): p is string => typeof p === 'string') : [];
+    } catch {
+      // Legacy fallback: migrate old CSV format on next write.
+      return index.split(',').filter(Boolean);
+    }
   }
 
   async addToIndex(name: string): Promise<void> {
     const existing = await this.listProjects();
     if (!existing.includes(name)) {
-      await this.secrets.store('hcloud.projectIndex', [...existing, name].join(','));
+      await this.secrets.store('hcloud.projectIndex', JSON.stringify([...existing, name]));
     }
   }
 
@@ -58,7 +64,7 @@ export class TokenManager {
     const existing = await this.listProjects();
     await this.secrets.store(
       'hcloud.projectIndex',
-      existing.filter((p) => p !== name).join(',')
+      JSON.stringify(existing.filter((p) => p !== name))
     );
   }
 

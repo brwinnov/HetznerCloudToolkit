@@ -10,6 +10,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.4.6] - 2026-06-28
+
+> Note: v0.4.5 below was never published to the Marketplace. Its changes are
+> included in this release alongside the additional fixes below.
+
+### Security
+- Crypto-secure CSP nonce generation across all WebViews (carried over from the unpublished 0.4.5 work)
+- Consistent HTML-escaping in the server creation wizard
+- Project index storage hardened against project names containing special characters (including commas)
+- SSH terminal launch now validates the server's IP address before connecting
+
+### Added
+- Automated regression test coverage for project-index storage, IP validation, and nonce generation
+
+### Fixed
+- Packaging: the VSIX no longer includes unbundled source files, test output, or internal build/dev configuration — package size reduced accordingly
+
+---
+
 ## [0.4.5] - 2026-06-28
 
 ### Changed
@@ -191,7 +210,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Status bar item** — shows active project name; click to switch
 - **First-use onboarding** — SSH key guide prompt on first project add; Welcome page on install
 
-[Unreleased]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.5...HEAD
+[Unreleased]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.6...HEAD
+[0.4.6]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.4...v0.4.6
 [0.4.5]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.3...v0.4.4
 [0.3.1]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.3.0...v0.3.1

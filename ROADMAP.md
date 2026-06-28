@@ -7,9 +7,10 @@
 
 ## Status Snapshot — 2026-06-28
 
-- Next build target is `v0.4.5` as a security maintenance release.
+- `v0.4.6` shipped as a combined security and test-hardening release (supersedes the unpublished `v0.4.5`).
 - Dependency remediation is complete, including forced major update for `esbuild`.
 - Current audit baseline is clean for both full dependency tree and runtime-only dependency tree.
+- All three `v0.4.6 — Security and Test Follow-ups` backlog items (below) are complete: project index storage hardening, SSH terminal IP validation, and regression test coverage (project-index parsing, SSH target validation, nonce helper output). Packaging was also fixed so the VSIX only ships the bundled `dist/extension.js`, not unbundled source or test output.
 - Next priority after release prep: deep code and security review of runtime paths.
 
 ---
@@ -101,13 +102,11 @@ gantt
 
 ## Backlog
 
-### v0.4.6 — Security and Test Follow-ups
+### v0.4.7 or later — Hardening Follow-ups
 
 | # | Feature | Notes |
 |---|---------|-------|
-| 1 | **Project index comma-safety fix** | Replace CSV project index handling to prevent name parsing edge cases. |
-| 2 | **SSH terminal command hardening** | Add stricter SSH target validation and safer terminal command construction. |
-| 3 | **Test foundation and regression coverage** | Add `.vscode-test` scaffolding plus regression tests for project-index parsing, SSH target validation, and nonce helper output. |
+| 1 | **IPv6 validation edge case in `isValidIpAddress()`** | Regex accepts some malformed/incomplete IPv6 forms (e.g. `1:2:3` without `::` compression). Non-security: the validator's character set still blocks any shell metacharacters, so there's no injection path — this is defense-in-depth correctness only, not urgent. |
 
 ### v0.2.0 — Polish
 

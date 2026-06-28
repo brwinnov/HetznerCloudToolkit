@@ -2,8 +2,9 @@ node_modules
 src
 out
 .vscode-test
+.vscode-test.mjs
 *.vsix
-tsconfig.json
+tsconfig*.json
 esbuild.js
 codereview
 scripts
@@ -12,6 +13,7 @@ PLAN-*.md
 .gitignore
 .vscode
 .claude
+CLAUDE.md
 dist/extension.js.map
 .cache_ggshield
 wiki-repo

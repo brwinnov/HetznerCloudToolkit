@@ -3,6 +3,7 @@ import { TokenManager } from '../utils/secretStorage';
 import { ServersProvider, ServerItem } from '../providers/serversProvider';
 import { ServerWizardPanel } from '../webviews/serverWizard';
 import { ServerDetailPanel } from '../webviews/serverDetail';
+import { isValidIpAddress } from '../utils/network';
 
 export function registerServerCommands(
   context: vscode.ExtensionContext,
@@ -101,8 +102,8 @@ export function registerServerCommands(
   context.subscriptions.push(
     vscode.commands.registerCommand('hcloud.sshServer', (item: ServerItem) => {
       const ip = item.server.public_net.ipv4?.ip ?? item.server.public_net.ipv6?.ip;
-      if (!ip) {
-        vscode.window.showErrorMessage('Server has no public IP address.');
+      if (!ip || !isValidIpAddress(ip)) {
+        vscode.window.showErrorMessage('Server has no valid public IP address.');
         return;
       }
       const terminal = vscode.window.createTerminal(`SSH: ${item.server.name}`);

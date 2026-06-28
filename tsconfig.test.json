@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "out"
+  },
+  "include": [
+    "src/test/**/*.ts",
+    "src/utils/secretStorage.ts",
+    "src/utils/network.ts",
+    "src/utils/nonce.ts",
+    "src/api/hetzner.ts"
+  ]
+}

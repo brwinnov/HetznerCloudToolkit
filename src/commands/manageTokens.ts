@@ -41,7 +41,11 @@ export function registerTokenCommands(
         title: 'Project Name',
         prompt: 'Enter a name for this Hetzner project',
         placeHolder: 'e.g. production, staging',
-        validateInput: (v) => (!v?.trim() ? 'Name cannot be empty' : undefined),
+        validateInput: (v) => {
+          if (!v?.trim()) return 'Name cannot be empty';
+          if (v.includes(',')) return 'Project name cannot contain a comma';
+          return undefined;
+        },
       });
       if (!name) return;
 
