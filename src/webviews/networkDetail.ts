@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { HNetwork } from '../api/hetzner';
+import { generateNonce } from '../utils/nonce';
 
 function escHtml(s: string | number): string {
   return String(s)
@@ -83,7 +84,7 @@ export class NetworkDetailPanel {
   }
 
   private renderHtml(network: HNetwork): string {
-    const nonce = [...Array(32)].map(() => Math.random().toString(36)[2] ?? '0').join('');
+    const nonce = generateNonce();
     const subnetCards = network.subnets.map(s => `
       <div class="subnet-card">
         <div><b>Range:</b> ${escHtml(s.ip_range)}</div>

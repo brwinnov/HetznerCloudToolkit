@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { generateNonce } from '../utils/nonce';
 
 export class CidrCalculator {
   private static panel: vscode.WebviewPanel | undefined;
@@ -37,13 +38,6 @@ export class CidrCalculator {
       }
     }, undefined, context.subscriptions);
   }
-}
-
-function generateNonce(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let n = '';
-  for (let i = 0; i < 32; i++) n += chars.charAt(Math.floor(Math.random() * chars.length));
-  return n;
 }
 
 function getCidrCalculatorHtml(nonce: string): string {

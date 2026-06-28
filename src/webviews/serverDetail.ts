@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { HServer, HetznerClient } from '../api/hetzner';
 import { ServersProvider } from '../providers/serversProvider';
+import { generateNonce } from '../utils/nonce';
 
 // Re-use a single panel per server id rather than opening duplicates
 const openPanels = new Map<number, ServerDetailPanel>();
@@ -137,14 +138,6 @@ function statusColor(status: HServer['status']): string {
 
 function statusLabel(status: HServer['status']): string {
   return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
-/** Cryptographically-adequate nonce for CSP inline script allowlisting. */
-function generateNonce(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let n = '';
-  for (let i = 0; i < 32; i++) n += chars.charAt(Math.floor(Math.random() * chars.length));
-  return n;
 }
 
 /** HTML-escape a string for safe use in text content and attribute values. */

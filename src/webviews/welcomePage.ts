@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { generateNonce } from '../utils/nonce';
 
 export class WelcomePage {
   private static panel: vscode.WebviewPanel | undefined;
@@ -54,13 +55,6 @@ export class WelcomePage {
       WelcomePage.open(context);
     }
   }
-}
-
-function generateNonce(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let n = '';
-  for (let i = 0; i < 32; i++) n += chars.charAt(Math.floor(Math.random() * chars.length));
-  return n;
 }
 
 function getWelcomeHtml(nonce: string): string {

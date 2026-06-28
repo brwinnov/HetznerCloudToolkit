@@ -15,6 +15,7 @@ codereview/
 # Local tool settings
 .claude/
 wiki-repo/
+*.code-workspace
 
 # Added by ggshield
 .cache_ggshield

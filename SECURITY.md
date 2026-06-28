@@ -16,9 +16,11 @@ Please open a private security report via GitHub Security Advisories if availabl
 
 ## Current Exceptions
 
-| Advisory | Severity | Dependency Path | Why accepted temporarily | Exit criteria |
-|---|---|---|---|---|
-| GHSA-gmq8-994r-jv83 (`yauzl` off-by-one) | Moderate | `@vscode/vsce -> yauzl` | Affects packaging tooling only (dev/CI), not extension runtime; `fixAvailable: false` from `npm audit` as of 2026-03-14 | Remove exception when `@vscode/vsce` upgrades to `yauzl >= 3.2.1` |
+No active exceptions as of 2026-06-28.
+
+Audit snapshot for release preparation:
+- `npm audit`: 0 vulnerabilities
+- `npm audit --omit=dev`: 0 vulnerabilities
 
 ## Review Cadence
 

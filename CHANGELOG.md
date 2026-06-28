@@ -10,6 +10,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.4.5] - 2026-06-28
+
+### Changed
+- Security maintenance release: forced dependency remediation applied (`npm audit fix --force`) and toolchain dependency `esbuild` updated to `^0.28.1`
+- Release process hardening: validated clean audit baseline for both full dependency tree and runtime-only tree (`npm audit` and `npm audit --omit=dev`)
+- WebView security hardening: moved all CSP script nonces to cryptographically secure generation and aligned server creation wizard rendering with consistent HTML escaping for location and server-type data
+
+### Verified
+- Lint, production build, and VSIX packaging completed successfully on the refreshed dependency set
+
+---
+
 ## [0.4.4] - 2026-03-14
 
 ### Changed
@@ -179,7 +191,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Status bar item** — shows active project name; click to switch
 - **First-use onboarding** — SSH key guide prompt on first project add; Welcome page on install
 
-[Unreleased]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.5...HEAD
+[0.4.5]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.4...v0.4.5
+[0.4.4]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.3...v0.4.4
 [0.3.1]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.2.9...v0.3.0
 [0.2.9]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.2.8...v0.2.9

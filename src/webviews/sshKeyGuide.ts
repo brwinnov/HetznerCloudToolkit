@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { generateNonce } from '../utils/nonce';
 
 export class SshKeyGuidePanel {
   static create(_context: vscode.ExtensionContext): void {
@@ -11,14 +12,6 @@ export class SshKeyGuidePanel {
 
     panel.webview.html = getGuideHtml();
   }
-}
-
-/** Cryptographically-adequate nonce for CSP inline script allowlisting. */
-function generateNonce(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let n = '';
-  for (let i = 0; i < 32; i++) n += chars.charAt(Math.floor(Math.random() * chars.length));
-  return n;
 }
 
 function getGuideHtml(): string {

@@ -5,6 +5,15 @@
 
 ---
 
+## Status Snapshot — 2026-06-28
+
+- Next build target is `v0.4.5` as a security maintenance release.
+- Dependency remediation is complete, including forced major update for `esbuild`.
+- Current audit baseline is clean for both full dependency tree and runtime-only dependency tree.
+- Next priority after release prep: deep code and security review of runtime paths.
+
+---
+
 ## Current State — v0.1.0
 
 The initial release is feature-complete and marketplace-ready.
@@ -91,6 +100,14 @@ gantt
 ---
 
 ## Backlog
+
+### v0.4.6 — Security and Test Follow-ups
+
+| # | Feature | Notes |
+|---|---------|-------|
+| 1 | **Project index comma-safety fix** | Replace CSV project index handling to prevent name parsing edge cases. |
+| 2 | **SSH terminal command hardening** | Add stricter SSH target validation and safer terminal command construction. |
+| 3 | **Test foundation and regression coverage** | Add `.vscode-test` scaffolding plus regression tests for project-index parsing, SSH target validation, and nonce helper output. |
 
 ### v0.2.0 — Polish
 

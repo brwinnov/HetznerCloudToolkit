@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { TokenManager, CloudInitLibrary } from '../utils/secretStorage';
+import { generateNonce } from '../utils/nonce';
 import { ServersProvider } from '../providers/serversProvider';
 import { HetznerClient, HLocation, HServerType, HImage, HSshKey, HNetwork } from '../api/hetzner';
 
@@ -287,14 +288,6 @@ interface CreateServerPayload {
   sshKeys: string[];
   networks: number[];
   cloudInit: string;
-}
-
-/** Cryptographically-adequate nonce for CSP inline script allowlisting. */
-function generateNonce(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let n = '';
-  for (let i = 0; i < 32; i++) n += chars.charAt(Math.floor(Math.random() * chars.length));
-  return n;
 }
 
 function getLoadingHtml(): string {
@@ -1353,10 +1346,10 @@ function renderLocations() {
   
   container.innerHTML = LOCATIONS.map(l => \`
     <div class="card \${l.name === state.location ? 'selected' : ''}"
-         data-location="\${l.name}">
-      <div class="card-title">\${locationFlags[l.name] || '🌍'} \${l.name.toUpperCase()}</div>
-      <div class="card-desc">\${l.city}, \${l.country}</div>
-      <div class="card-desc" style="margin-top:4px;opacity:0.7">\${l.network_zone}</div>
+         data-location="\${h(l.name)}">
+      <div class="card-title">\${locationFlags[l.name] || '🌍'} \${h(l.name.toUpperCase())}</div>
+      <div class="card-desc">\${h(l.city)}, \${h(l.country)}</div>
+      <div class="card-desc" style="margin-top:4px;opacity:0.7">\${h(l.network_zone)}</div>
     </div>
   \`).join('');
 }
@@ -1395,13 +1388,13 @@ function renderServerTypes(filter) {
 
   container.innerHTML = types.map(t => \`
     <div class="card \${t.name === state.serverType ? 'selected' : ''}"
-         data-server-type="\${t.name}">
-      <div class="card-badge">\${t.cpu_type}</div>
-      <div class="card-title">\${t.name}</div>
+         data-server-type="\${h(t.name)}">
+      <div class="card-badge">\${h(t.cpu_type)}</div>
+      <div class="card-title">\${h(t.name)}</div>
       <div class="card-desc">
-        \${t.cores} vCPU · \${t.memory}GB RAM<br>
-        \${t.disk}GB \${t.storage_type}<br>
-        \${t.architecture}
+        \${h(t.cores)} vCPU · \${h(t.memory)}GB RAM<br>
+        \${h(t.disk)}GB \${h(t.storage_type)}<br>
+        \${h(t.architecture)}
       </div>
     </div>
   \`).join('');
