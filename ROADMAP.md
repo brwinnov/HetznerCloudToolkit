@@ -174,6 +174,7 @@ Everything else from the original v1.0.0 list has shipped: firewall CRUD and vol
 | 13 | **Multiple API tokens per project** | Support adding multiple tokens for same project (token rotation, different access levels). Current: 1 token = 1 project. Note: Hetzner Cloud API tokens are per-project only (no global account token exists). |
 | 14 | **Token metadata & labels** | Label tokens by purpose (e.g. "Production Read-Only", "Staging Full Access") for better organization |
 | 15 | **API token health check** | Periodic validation to detect expired/revoked tokens; show warning icon in Projects tree |
+| 16 | **Open VSX Registry publishing** | Considered and deliberately deferred. Publishing to [Open VSX](https://open-vsx.org) alongside the Microsoft Marketplace would reach VSCodium, Gitpod and Cursor users, who cannot install from the Microsoft Marketplace at all. Implementation is small — an `ovsx publish` step in `release.yml`'s existing publish job, inheriting the same `marketplace-publish` approval gate. The cost is a second credential: an `OVSX_PAT` to create, store and rotate. Not worth taking on right now, given how much PAT and publishing-identity friction this project already absorbed during the v0.5.0 cycle. Revisit when the existing Marketplace PAT comes up for rotation. |
 
 ---
 
