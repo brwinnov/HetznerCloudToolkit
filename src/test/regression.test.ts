@@ -3,7 +3,7 @@ import type { SecretStorage } from 'vscode';
 import { suite, test } from 'mocha';
 
 import { TokenManager } from '../utils/secretStorage';
-import { isValidIpAddress } from '../utils/network';
+import { isValidIpAddress, isValidCidr, ipv6HostFromPrefix } from '../utils/network';
 import { generateNonce } from '../utils/nonce';
 
 class MockSecretStorage {
@@ -70,6 +70,51 @@ suite('Regression tests', () => {
       assert.strictEqual(isValidIpAddress('999.1.1.1'), false);
       assert.strictEqual(isValidIpAddress(''), false);
       assert.strictEqual(isValidIpAddress("'; rm -rf ~ #"), false);
+    });
+  });
+
+  suite('CIDR validation', () => {
+    test('accepts valid IPv4 and IPv6 CIDR ranges', () => {
+      assert.strictEqual(isValidCidr('0.0.0.0/0'), true);
+      assert.strictEqual(isValidCidr('10.0.0.0/8'), true);
+      assert.strictEqual(isValidCidr('192.168.1.0/24'), true);
+      assert.strictEqual(isValidCidr('::/0'), true);
+      assert.strictEqual(isValidCidr('2a01:4f8::/32'), true);
+    });
+
+    test('rejects invalid CIDR strings that passed the old regex', () => {
+      assert.strictEqual(isValidCidr('abc'), false);
+      assert.strictEqual(isValidCidr('face'), false);
+      assert.strictEqual(isValidCidr('1.2.3.4/999'), false);
+      assert.strictEqual(isValidCidr('999.999.999.999/0'), false);
+      assert.strictEqual(isValidCidr('1.2.3.4/33'), false);
+      assert.strictEqual(isValidCidr('::/129'), false);
+      assert.strictEqual(isValidCidr('1.2.3.4'), false);
+      assert.strictEqual(isValidCidr(''), false);
+    });
+  });
+
+  suite('IPv6 host derivation from Hetzner /64 prefix', () => {
+    test('derives ::1 host from a /64 prefix', () => {
+      assert.strictEqual(ipv6HostFromPrefix('2a01:4f8:1:2::/64'), '2a01:4f8:1:2::1');
+    });
+
+    test('passes through an existing host address', () => {
+      assert.strictEqual(ipv6HostFromPrefix('2a01:4f8::1'), '2a01:4f8::1');
+    });
+
+    test('returns undefined for garbage', () => {
+      assert.strictEqual(ipv6HostFromPrefix('not-an-ip/64'), undefined);
+      assert.strictEqual(ipv6HostFromPrefix(''), undefined);
+      assert.strictEqual(ipv6HostFromPrefix('1.2.3.4/24'), undefined);
+    });
+  });
+
+  suite('IP validation (net.isIP-backed)', () => {
+    test('fixes old IPv6 edge cases', () => {
+      assert.strictEqual(isValidIpAddress('1::2::3'), false);      // old validator accepted this
+      assert.strictEqual(isValidIpAddress('::ffff:192.0.2.1'), true); // old validator rejected this
+      assert.strictEqual(isValidIpAddress('::1'), true);
     });
   });
 

@@ -58,25 +58,38 @@ export function registerSshKeyCommands(
         if (!input) return;
         publicKey = input.trim();
       } else {
-        publicKey = fs.readFileSync(picked.description!, 'utf8').trim();
+        try {
+          publicKey = fs.readFileSync(picked.description!, 'utf8').trim();
+        } catch (err: unknown) {
+          vscode.window.showErrorMessage(
+            `Could not read key file: ${err instanceof Error ? err.message : String(err)}`
+          );
+          return;
+        }
       }
 
+      const isManual = picked.label === manualOption.label;
       const keyName = await vscode.window.showInputBox({
         title: 'SSH Key Name',
         prompt: 'Enter a name for this SSH key in Hetzner',
         placeHolder: 'e.g. my-laptop',
-        value: picked.label.replace('.pub', ''),
+        value: isManual ? '' : picked.label.replace('.pub', ''),
         validateInput: (v) => (!v?.trim() ? 'Name cannot be empty' : undefined),
       });
       if (!keyName) return;
 
-      await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: 'Uploading SSH key...' },
-        () => client.addSshKey(keyName.trim(), publicKey)
-      );
-
-      sshKeysProvider.refresh();
-      vscode.window.showInformationMessage(`SSH key "${keyName}" added to Hetzner.`);
+      try {
+        await vscode.window.withProgress(
+          { location: vscode.ProgressLocation.Notification, title: 'Uploading SSH key...' },
+          () => client.addSshKey(keyName.trim(), publicKey)
+        );
+        sshKeysProvider.refresh();
+        vscode.window.showInformationMessage(`SSH key "${keyName}" added to Hetzner.`);
+      } catch (err: unknown) {
+        vscode.window.showErrorMessage(
+          `Failed to add SSH key: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
     })
   );
 

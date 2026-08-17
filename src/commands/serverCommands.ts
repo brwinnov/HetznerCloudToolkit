@@ -3,7 +3,7 @@ import { TokenManager } from '../utils/secretStorage';
 import { ServersProvider, ServerItem } from '../providers/serversProvider';
 import { ServerWizardPanel } from '../webviews/serverWizard';
 import { ServerDetailPanel } from '../webviews/serverDetail';
-import { isValidIpAddress } from '../utils/network';
+import { isValidIpAddress, ipv6HostFromPrefix } from '../utils/network';
 
 export function registerServerCommands(
   context: vscode.ExtensionContext,
@@ -19,10 +19,14 @@ export function registerServerCommands(
     vscode.commands.registerCommand('hcloud.startServer', async (item: ServerItem) => {
       const client = await tokenManager.getActiveClient();
       if (!client) return;
-      await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: `Starting ${item.server.name}...` },
-        () => client.powerOnServer(item.server.id)
-      );
+      try {
+        await vscode.window.withProgress(
+          { location: vscode.ProgressLocation.Notification, title: `Starting ${item.server.name}...` },
+          () => client.powerOnServer(item.server.id)
+        );
+      } catch (err: unknown) {
+        vscode.window.showErrorMessage(`Failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
       serversProvider.refresh();
     })
   );
@@ -39,10 +43,14 @@ export function registerServerCommands(
 
       const client = await tokenManager.getActiveClient();
       if (!client) return;
-      await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: `Stopping ${item.server.name}...` },
-        () => client.powerOffServer(item.server.id)
-      );
+      try {
+        await vscode.window.withProgress(
+          { location: vscode.ProgressLocation.Notification, title: `Stopping ${item.server.name}...` },
+          () => client.powerOffServer(item.server.id)
+        );
+      } catch (err: unknown) {
+        vscode.window.showErrorMessage(`Failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
       serversProvider.refresh();
     })
   );
@@ -59,10 +67,14 @@ export function registerServerCommands(
 
       const client = await tokenManager.getActiveClient();
       if (!client) return;
-      await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: `Rebooting ${item.server.name}...` },
-        () => client.rebootServer(item.server.id)
-      );
+      try {
+        await vscode.window.withProgress(
+          { location: vscode.ProgressLocation.Notification, title: `Rebooting ${item.server.name}...` },
+          () => client.rebootServer(item.server.id)
+        );
+      } catch (err: unknown) {
+        vscode.window.showErrorMessage(`Failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
       serversProvider.refresh();
     })
   );
@@ -90,10 +102,14 @@ export function registerServerCommands(
 
       const client = await tokenManager.getActiveClient();
       if (!client) return;
-      await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: `Deleting ${item.server.name}...` },
-        () => client.deleteServer(item.server.id)
-      );
+      try {
+        await vscode.window.withProgress(
+          { location: vscode.ProgressLocation.Notification, title: `Deleting ${item.server.name}...` },
+          () => client.deleteServer(item.server.id)
+        );
+      } catch (err: unknown) {
+        vscode.window.showErrorMessage(`Failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
       serversProvider.refresh();
     })
   );
@@ -101,7 +117,9 @@ export function registerServerCommands(
   // SSH
   context.subscriptions.push(
     vscode.commands.registerCommand('hcloud.sshServer', (item: ServerItem) => {
-      const ip = item.server.public_net.ipv4?.ip ?? item.server.public_net.ipv6?.ip;
+      // Hetzner reports IPv6 as a /64 prefix, not a host address — derive the ::1 host.
+      const rawV6 = item.server.public_net.ipv6?.ip;
+      const ip = item.server.public_net.ipv4?.ip ?? (rawV6 ? ipv6HostFromPrefix(rawV6) : undefined);
       if (!ip || !isValidIpAddress(ip)) {
         vscode.window.showErrorMessage('Server has no valid public IP address.');
         return;

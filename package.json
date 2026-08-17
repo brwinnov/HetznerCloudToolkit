@@ -1,11 +1,11 @@
 {
   "name": "vscode-hetzner-cloud",
   "displayName": "Hetzner Cloud Toolkit",
-  "description": "Manage Hetzner Cloud infrastructure directly from VS Code — servers, networks, SSH keys, Tailscale and more",
-  "version": "0.4.6",
+  "description": "Manage Hetzner Cloud infrastructure directly from VS Code \u2014 servers, networks, SSH keys, Tailscale and more",
+  "version": "0.5.0",
   "publisher": "brwinnovvsce",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.100.0"
   },
   "categories": [
     "Other"
@@ -15,7 +15,13 @@
     "cloud",
     "vps",
     "server",
-    "infrastructure"
+    "infrastructure",
+    "hcloud",
+    "tailscale",
+    "devops",
+    "cloud-init",
+    "firewall",
+    "ssh"
   ],
   "icon": "resources/icon.png",
   "license": "MIT",
@@ -26,9 +32,6 @@
   },
   "bugs": {
     "url": "https://github.com/brwinnov/vscode-hetzner-cloud/issues"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   },
   "galleryBanner": {
     "color": "#D50C2D",
@@ -519,6 +522,84 @@
           "when": "view == hcloud.volumes && viewItem == volume-detached",
           "group": "9_danger@1"
         }
+      ],
+      "commandPalette": [
+        {
+          "command": "hcloud.startServer",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.stopServer",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.rebootServer",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.deleteServer",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.sshServer",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.showServerDetail",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.deleteNetwork",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.deleteSubnet",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.showNetworkDetail",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.deleteSshKey",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.deleteFirewall",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.addFirewallRule",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.deleteFirewallRule",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.applyFirewallToServer",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.removeFirewallFromServer",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.attachVolume",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.detachVolume",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.resizeVolume",
+          "when": "false"
+        },
+        {
+          "command": "hcloud.deleteVolume",
+          "when": "false"
+        }
       ]
     },
     "configuration": {
@@ -545,28 +626,26 @@
     "build:prod": "node esbuild.js --production",
     "watch": "node esbuild.js --watch",
     "package": "npx vsce package",
-    "lint": "eslint src --ext ts",
+    "lint": "eslint src",
     "pretest": "tsc -p ./tsconfig.test.json",
     "test": "vscode-test",
     "audit:high": "npm audit --audit-level=high"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "@types/vscode": "^1.85.0",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.3.8",
-    "@vscode/vsce": "^3.7.1",
-    "esbuild": "^0.28.1",
-    "eslint": "^8.56.0",
-    "prettier": "^3.2.0",
-    "typescript": "^5.3.0"
+    "@types/node": "^22.0.0",
+    "@types/vscode": "1.100.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.67.0"
   },
+  "private": true,
   "overrides": {
-    "flatted": "^3.4.0",
-    "undici": "^7.24.0",
-    "serialize-javascript": "^7.0.4",
+    "serialize-javascript": "^7.0.5",
     "diff": "^8.0.3"
   }
 }

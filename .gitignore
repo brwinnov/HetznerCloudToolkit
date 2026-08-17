@@ -17,5 +17,8 @@ codereview/
 wiki-repo/
 *.code-workspace
 
+# Local-only archive (old packaged builds, etc.)
+archive/
+
 # Added by ggshield
 .cache_ggshield

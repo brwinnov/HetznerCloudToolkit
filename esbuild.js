@@ -14,7 +14,8 @@ async function main() {
     platform: "node",
     outfile: "dist/extension.js",
     external: ["vscode"],
-    logLevel: "silent",
+    target: "node20",
+    logLevel: watch ? "silent" : "warning",
     plugins: [esbuildProblemMatcherPlugin],
   });
 

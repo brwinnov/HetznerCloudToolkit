@@ -160,6 +160,25 @@ export class ServerWizardPanel {
           validateInput: (v) => (!v?.trim() ? 'Name cannot be empty' : undefined),
         });
         if (!tplName) break;
+        // Templates persist to UNENCRYPTED extension storage — warn if the
+        // content looks like it contains credentials before saving.
+        const secretPatterns: Array<[RegExp, string]> = [
+          [/tskey-[a-z]*-?[A-Za-z0-9]+/i, 'a Tailscale auth key'],
+          [/-----BEGIN [A-Z ]*PRIVATE KEY-----/, 'a private key'],
+          [/\b(password|passwd)\s*[:=]\s*\S+/i, 'a password'],
+          [/\b(api[_-]?key|api[_-]?token|secret[_-]?key|access[_-]?token)\s*[:=]\s*\S+/i, 'an API key or token'],
+          [/\bAKIA[0-9A-Z]{16}\b/, 'an AWS access key'],
+        ];
+        const hit = secretPatterns.find(([re]) => re.test(content));
+        if (hit) {
+          const proceed = await vscode.window.showWarningMessage(
+            `This template appears to contain ${hit[1]}. Templates are stored UNENCRYPTED on disk — ` +
+              'anyone with access to this machine could read it. Save anyway?',
+            { modal: true },
+            'Save Anyway'
+          );
+          if (proceed !== 'Save Anyway') break;
+        }
         await this.library.saveTemplate(tplName.trim(), content);
         vscode.window.showInformationMessage(`Cloud-init template "${tplName}" saved.`);
         break;
@@ -291,14 +310,14 @@ interface CreateServerPayload {
 }
 
 function getLoadingHtml(): string {
-  return `<!DOCTYPE html><html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:var(--vscode-font-family);color:var(--vscode-foreground);background:var(--vscode-editor-background)">
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';"/></head><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:var(--vscode-font-family);color:var(--vscode-foreground);background:var(--vscode-editor-background)">
     <div style="text-align:center"><div style="font-size:24px;margin-bottom:12px">⏳</div><div>Loading Hetzner data...</div></div>
   </body></html>`;
 }
 
 function getErrorHtml(msg: string): string {
   const safe = msg.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  return `<!DOCTYPE html><html><body style="padding:24px;font-family:var(--vscode-font-family);color:var(--vscode-errorForeground);background:var(--vscode-editor-background)">
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';"/></head><body style="padding:24px;font-family:var(--vscode-font-family);color:var(--vscode-errorForeground);background:var(--vscode-editor-background)">
     <h2>Failed to load wizard</h2><p>${safe}</p>
   </body></html>`;
 }
@@ -308,6 +327,7 @@ function getWizardHtml(data: WizardData): string {
   const locationsB64 = Buffer.from(JSON.stringify(data.locations), 'utf8').toString('base64');
   const serverTypesB64 = Buffer.from(JSON.stringify(data.serverTypes), 'utf8').toString('base64');
   const imagesB64 = Buffer.from(JSON.stringify(data.images), 'utf8').toString('base64');
+  const defaultRegionB64 = Buffer.from(JSON.stringify(data.defaultRegion), 'utf8').toString('base64');
   const sshKeysB64 = Buffer.from(JSON.stringify(data.sshKeys), 'utf8').toString('base64');
   const networksB64 = Buffer.from(JSON.stringify(data.networks), 'utf8').toString('base64');
 
@@ -1012,7 +1032,7 @@ const state = {
   currentStep: 0,
   completedSteps: new Set(),
   name: '',
-  location: ${JSON.stringify(data.defaultRegion)},
+  location: decodeB64Json('${defaultRegionB64}'),
   serverType: '',
   image: '',
   imageDisplay: '',
@@ -1028,7 +1048,11 @@ const state = {
 window.addEventListener('message', (e) => {
   const msg = e.data;
   if (msg.command === 'setLoading') showLoading(msg.message);
-  if (msg.command === 'error') { hideLoading(); showError(msg.message); }
+  if (msg.command === 'error') {
+    hideLoading(); showError(msg.message);
+    const cb = document.getElementById('createBtn');
+    if (cb) { cb.disabled = false; cb.textContent = '⚡ Create Server'; }
+  }
   if (msg.command === 'sshKeysUpdated') {
     SSH_KEYS = msg.keys;
     // Auto-select any newly added keys
@@ -1057,7 +1081,12 @@ function deleteCloudInitTemplate() {
   vscode.postMessage({ command: 'deleteCloudInitTemplate' });
 }
 function acquireVsCodeInstance() {
-  try { return acquireVsCodeApi(); } catch(e) { return { postMessage: console.log }; }
+  try {
+    return acquireVsCodeApi();
+  } catch (e) {
+    // Never fall back to console.log — payloads can include cloud-init secrets.
+    return { postMessage: () => { showError('VS Code API unavailable — reload the wizard.'); } };
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1119,14 +1148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       btn.textContent.toLowerCase().includes('dedicated') ? 'dedicated' :
                       btn.textContent.toLowerCase().includes('arm') ? 'arm' : 'all';
         renderServerTypes(filter);
-        // Re-wire type card listeners after render
-        document.getElementById('typeCards').addEventListener('click', (e) => {
-          const card = e.target.closest('.card[data-server-type]');
-          if (!card) return;
-          state.serverType = card.dataset.serverType;
-          document.querySelectorAll('#typeCards .card').forEach(c => c.classList.remove('selected'));
-          card.classList.add('selected');
-        });
+        // (delegated #typeCards listener from init survives re-renders)
       });
     });
   }
@@ -1148,15 +1170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.useCustomImage = isCustom;
         if (!isCustom) {
           renderImages();
-          // Re-wire image card listeners after render
-          document.getElementById('imageCards').addEventListener('click', (e) => {
-            const card = e.target.closest('.card[data-image]');
-            if (!card) return;
-            state.image = card.dataset.image;
-            state.imageDisplay = card.dataset.imageDisplay;
-            document.querySelectorAll('#imageCards .card').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-          });
+          // (delegated #imageCards listener from init survives re-renders)
         }
       });
     });
@@ -1167,15 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (imageSearchInput) {
     imageSearchInput.addEventListener('input', () => {
       renderImages();
-      // Re-wire image card listeners after render
-      document.getElementById('imageCards').addEventListener('click', (e) => {
-        const card = e.target.closest('.card[data-image]');
-        if (!card) return;
-        state.image = card.dataset.image;
-        state.imageDisplay = card.dataset.imageDisplay;
-        document.querySelectorAll('#imageCards .card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-      });
+      // (delegated #imageCards listener from init survives re-renders)
     });
   }
 
@@ -1436,11 +1442,12 @@ function renderImages() {
   }
 
   container.innerHTML = imgs.map(i => {
-    const label = i.name || i.description;
+    const label = i.name || i.description || ('image-' + i.id);
+    const value = i.name || String(i.id);
     const iconKey = Object.keys(osIcons).find(k => label.toLowerCase().includes(k)) || 'default';
     return \`
-      <div class="card \${i.name === state.image ? 'selected' : ''}"
-           data-image="\${h(i.name || i.id)}"
+      <div class="card \${value === state.image ? 'selected' : ''}"
+           data-image="\${h(value)}"
            data-image-display="\${h(label)}">
         <div class="card-badge">\${h(i.type)}</div>
         <div class="card-title">\${osIcons[iconKey]} \${h(label)}</div>
@@ -1514,7 +1521,7 @@ function renderNetworks() {
   container.innerHTML = NETWORKS.map(n => \`
     <div style="margin-bottom:12px;border:1px solid var(--vscode-panel-border);border-radius:6px;overflow:hidden">
       <label class="check-card \${state.networks.includes(n.id) ? 'selected' : ''}"
-             data-network-id="\${n.id}"
+             data-network-id="\${h(n.id)}"
              style="border-radius:0;margin:0;border-bottom:1px solid var(--vscode-panel-border)">
         <div class="check-icon">\${state.networks.includes(n.id) ? '✓' : ''}</div>
         <div style="flex:1">
@@ -1525,7 +1532,7 @@ function renderNetworks() {
       <div style="background:rgba(128,128,128,0.1);padding:8px;border-radius:0">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <div style="font-size:10px;font-weight:600;color:var(--vscode-descriptionForeground);text-transform:uppercase">Subnets (\${n.subnets?.length || 0})</div>
-          <button class="btn-secondary" style="padding:2px 8px;font-size:10px" data-action="create-subnet" data-network-id="\${n.id}" data-network-zone="\${h(n.network_zone || 'eu-central')}">+ Add Subnet</button>
+          <button class="btn-secondary" style="padding:2px 8px;font-size:10px" data-action="create-subnet" data-network-id="\${h(n.id)}" data-network-zone="\${h(n.network_zone || 'eu-central')}">+ Add Subnet</button>
         </div>
         \${n.subnets && n.subnets.length > 0 
           ? n.subnets.map(s => \`
@@ -1591,6 +1598,13 @@ function renderSummary() {
 
 // ── Create ─────────────────────────────────────────────────────────────────
 function createServer() {
+  // Guard against double-clicks creating two billed servers
+  const btn = document.getElementById('createBtn');
+  if (btn) {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = '⏳ Creating...';
+  }
   document.getElementById('errorBanner').className = 'banner';
   vscode.postMessage({
     command: 'createServer',
