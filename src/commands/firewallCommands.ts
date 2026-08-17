@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { HFirewallRule } from '../api/hetzner';
 import { TokenManager } from '../utils/secretStorage';
 import { FirewallsProvider, FirewallItem, RuleItem } from '../providers/firewallsProvider';
+import { isValidCidr } from '../utils/network';
 
 // ── Default rule sets ──────────────────────────────────────────────────────
 
@@ -165,7 +166,7 @@ export function registerFirewallCommands(
         validateInput: (v) => {
           if (!v?.trim()) return 'Must specify at least one IP range';
           const parts = v.split(',').map((s) => s.trim()).filter(Boolean);
-          const invalid = parts.find((p) => !/^[\d:.a-fA-F/]+$/.test(p));
+          const invalid = parts.find((p) => !isValidCidr(p));
           if (invalid) return `Invalid CIDR: ${invalid}`;
           return undefined;
         },
@@ -224,13 +225,26 @@ export function registerFirewallCommands(
       try {
         const fresh = await client.getFirewall(item.firewallId);
         const target = item.rule;
-        const updatedRules = fresh.rules.filter((r) =>
-          !(r.direction === target.direction &&
-            r.protocol === target.protocol &&
-            r.port === target.port &&
-            JSON.stringify(r.source_ips) === JSON.stringify(target.source_ips) &&
-            JSON.stringify(r.destination_ips) === JSON.stringify(target.destination_ips))
-        );
+        const matches = (r: HFirewallRule) =>
+          r.direction === target.direction &&
+          r.protocol === target.protocol &&
+          r.port === target.port &&
+          JSON.stringify(r.source_ips) === JSON.stringify(target.source_ips) &&
+          JSON.stringify(r.destination_ips) === JSON.stringify(target.destination_ips);
+        // Remove exactly ONE rule: prefer the original index if it still matches
+        // (rules identical except description must not all be deleted).
+        let removeAt = -1;
+        if (item.ruleIndex >= 0 && item.ruleIndex < fresh.rules.length && matches(fresh.rules[item.ruleIndex])) {
+          removeAt = item.ruleIndex;
+        } else {
+          removeAt = fresh.rules.findIndex(matches);
+        }
+        if (removeAt === -1) {
+          vscode.window.showWarningMessage('Rule not found — the firewall may have changed. Refresh and try again.');
+          firewallsProvider.refresh();
+          return;
+        }
+        const updatedRules = fresh.rules.filter((_, i) => i !== removeAt);
         await vscode.window.withProgress(
           { location: vscode.ProgressLocation.Notification, title: 'Removing rule...' },
           () => client.setFirewallRules(item.firewallId, updatedRules)

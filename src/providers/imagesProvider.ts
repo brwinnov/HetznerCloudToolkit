@@ -4,7 +4,7 @@ import { TokenManager } from '../utils/secretStorage';
 
 export class ImageItem extends vscode.TreeItem {
   constructor(public readonly image: HImage) {
-    const label = image.name ?? image.description;
+    const label = image.name ?? image.description ?? `image-${image.id}`;
     super(label, vscode.TreeItemCollapsibleState.None);
     this.description = `${image.os_flavor} ${image.os_version ?? ''} · ${image.type}`;
     this.tooltip = `${image.description}\nType: ${image.type}\nCreated: ${new Date(image.created).toLocaleDateString()}`;
@@ -34,12 +34,13 @@ export class ImagesProvider implements vscode.TreeDataProvider<ImageItem> {
     if (!client) return [];
 
     try {
-      const [system, snapshots, backups] = await Promise.all([
+      const [system, snapshots, backups, apps] = await Promise.all([
         client.getImages('system'),
         client.getImages('snapshot'),
         client.getImages('backup'),
+        client.getImages('app'),
       ]);
-      return [...system, ...snapshots, ...backups].map((i) => new ImageItem(i));
+      return [...system, ...snapshots, ...backups, ...apps].map((i) => new ImageItem(i));
     } catch (err: unknown) {
       vscode.window.showErrorMessage(`Failed to load images: ${(err as Error).message}`);
       return [];

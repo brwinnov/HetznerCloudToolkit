@@ -484,7 +484,7 @@ ssh-add ~/.ssh/id_ed25519</code></pre>
 Host hetzner-*
   User root
   IdentityFile ~/.ssh/id_ed25519
-  StrictHostKeyChecking no
+  StrictHostKeyChecking accept-new
 EOF</code></pre>
     </div>
 

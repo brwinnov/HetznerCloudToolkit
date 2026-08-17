@@ -14,7 +14,16 @@ PLAN-*.md
 .vscode
 .claude
 CLAUDE.md
-dist/extension.js.map
+AGENTS.md
+*.code-workspace
+**/*.map
 .cache_ggshield
 wiki-repo
 setup-npm-auth.ps1
+.github/**
+archive/**
+.eslintrc.json
+eslint.config.mjs
+.prettierrc*
+.editorconfig
+**/.DS_Store

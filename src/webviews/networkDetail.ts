@@ -94,31 +94,15 @@ export class NetworkDetailPanel {
       </div>
     `).join('');
     return `
-      <html>
+      <html lang="en">
       <head>
+        <meta charset="UTF-8">
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
         <style>
           .header { font-size: 1.3em; margin-bottom: 8px; }
           .subnet-card { border: 1px solid #ccc; padding: 8px; margin-bottom: 8px; border-radius: 4px; }
           .section { margin-bottom: 16px; }
         </style>
-        <script nonce="${nonce}">
-          const vscode = window.acquireVsCodeApi();
-          window.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('button[data-action="deleteSubnet"]').forEach(btn => {
-              btn.addEventListener('click', () => {
-                const ipRange = btn.getAttribute('data-ip-range');
-                vscode.postMessage({ command: 'deleteSubnet', ipRange });
-              });
-            });
-            document.querySelector('button[data-action="addSubnet"]')?.addEventListener('click', () => {
-              vscode.postMessage({ command: 'addSubnet' });
-            });
-            document.querySelector('button[data-action="deleteNetwork"]')?.addEventListener('click', () => {
-              vscode.postMessage({ command: 'deleteNetwork' });
-            });
-          });
-        </script>
       </head>
       <body>
         <div class="header">${escHtml(network.name)} <span style="color:#888">(${escHtml(network.ip_range)})</span></div>
@@ -137,6 +121,23 @@ export class NetworkDetailPanel {
           <button data-action="addSubnet">+ Add Subnet</button>
           <button data-action="deleteNetwork">🗑️ Delete Network</button>
         </div>
+        <script nonce="${nonce}">
+          const vscode = window.acquireVsCodeApi();
+          window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('button[data-action="deleteSubnet"]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const ipRange = btn.getAttribute('data-ip-range');
+                vscode.postMessage({ command: 'deleteSubnet', ipRange });
+              });
+            });
+            document.querySelector('button[data-action="addSubnet"]')?.addEventListener('click', () => {
+              vscode.postMessage({ command: 'addSubnet' });
+            });
+            document.querySelector('button[data-action="deleteNetwork"]')?.addEventListener('click', () => {
+              vscode.postMessage({ command: 'deleteNetwork' });
+            });
+          });
+        </script>
       </body>
       </html>
     `;

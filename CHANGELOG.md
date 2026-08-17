@@ -10,6 +10,42 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.0] - 2026-08-17
+
+### Fixed
+- **`hcloud.addSubnet` and `hcloud.refreshImages` were contributed but never registered** — the Images view's refresh button and the Add Subnet action (tree context menu and network detail panel) threw *"command not found"*. Both now work; `addSubnet` accepts a tree item or detail-panel context and falls back to the network picker
+- Firewall rule deletion removed **every** rule matching direction/protocol/port/IPs — rules identical except description were all deleted together. Deletion is now index-based and removes exactly one rule
+- IPv6-only servers could never SSH: Hetzner reports IPv6 as a /64 prefix, which failed IP validation. The conventional `::1` host address is now derived for SSH and display
+- Running tree-item commands (delete server/network/volume, SSH, etc.) from the Command Palette crashed with a TypeError — they are now hidden from the palette
+- Server creation wizard: "Create Server" button is disabled immediately on click (double-clicks could create two billed servers); re-enabled on error
+- Server creation wizard: image cards with a null name and description no longer break rendering; snapshot selection highlight survives search/filter re-renders; duplicate event listeners no longer accumulate on filter/search interaction
+- SSH key upload: file-read errors are now caught; manual-entry flow no longer pre-fills the key name with the literal picker label
+- Volume size inputs strictly validate whole numbers (previously `10abc` was accepted as 10)
+- Missing error handling added to create/delete network, add SSH key, and server start/stop/reboot/delete commands
+- Adding a project with an existing name now warns before overwriting the stored token
+- `app`-type images are now fetched and shown in the Images view
+- CHANGELOG: added missing `[0.4.3]` link definition; note: versions 0.4.0–0.4.2 were internal iterations that were never published
+
+### Security
+- Cloud-init templates: saving a template that appears to contain credentials (Tailscale keys, private keys, passwords, API tokens) now warns that template storage is unencrypted
+- Server wizard: `hcloud.defaultRegion` setting is now base64-transported into the WebView like all other bootstrap data (a malicious workspace `.vscode/settings.json` could previously inject markup via a crafted region string)
+- WebView hardening: `getImages()` API parameter is URI-encoded; network detail panel gained charset/lang and CSP-consistent script placement; wizard loading/error pages gained CSP meta tags; removed a `console.log` postMessage fallback that could echo cloud-init content; volumes tooltip no longer sets `isTrusted`
+- Firewall rule CIDR input now strictly validates IPv4/IPv6 CIDR (previously `abc` or `1.2.3.4/999` passed)
+- IP validation now uses Node's `net.isIP` (fixes IPv6 edge cases such as `1::2::3` being accepted)
+- SSH key guide: SSH config recipe now uses `StrictHostKeyChecking accept-new` instead of `no`
+- SECURITY.md: vulnerability reports now go through GitHub Private Vulnerability Reporting instead of public issues; added supported-versions table and response SLA
+
+### Changed
+- All tree view disposables are now registered in `context.subscriptions`
+- Toolchain modernised: TypeScript 5.9, ESLint 10 (flat config), typescript-eslint 8, esbuild 0.28.2, @vscode/vsce 3.9, @vscode/test-electron 3.1, prettier 3.9; ESLint 8 and @typescript-eslint 7 (both EOL) removed
+- Minimum VS Code version raised from 1.85 to **1.100**; `@types/vscode` pinned to match
+- `package.json`: removed misleading `publishConfig` (GitHub Packages npm registry), added `"private": true`; expanded marketplace keywords; dependency `overrides` re-baselined (only `serialize-javascript` and `diff` still required, for mocha's nested dependencies — full and runtime `npm audit` both clean)
+- esbuild: added `target: node20`; build warnings no longer suppressed
+- `tsconfig.json`: `noEmit` (bundling is esbuild's job — prevents stray `tsc` output landing in `dist/`)
+- `.vscodeignore`: now excludes `.github`, `archive`, all `*.map` files, lint/format configs, agent instruction files (`AGENTS.md`) and `*.code-workspace` from the VSIX
+- CI: new `ci.yml` (lint, build, tests under xvfb, VSIX package check on every push/PR) and `release.yml` (tag-triggered: a `build` job lints/typechecks/tests/packages with no secret access, then a `publish` job gated on the `marketplace-publish` environment (required reviewer, deployments restricted to `v*` tags) uploads that exact VSIX to the Marketplace and attaches it to a GitHub Release; the tag must match `package.json`'s version or the run fails before doing any work); security audit now also runs weekly and gates the runtime tree at moderate level. Removed the stale `publish-extension.disabled.yml` — despite the name, GitHub dispatches workflows by file extension, so it still triggered on `v*` tags and would have raced `release.yml` into a duplicate publish
+
+---
 ## [0.4.6] - 2026-06-28
 
 > Note: v0.4.5 below was never published to the Marketplace. Its changes are
@@ -210,10 +246,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Status bar item** — shows active project name; click to switch
 - **First-use onboarding** — SSH key guide prompt on first project add; Welcome page on install
 
-[Unreleased]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.6...HEAD
+[Unreleased]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.6...v0.5.0
 [0.4.6]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.4...v0.4.6
 [0.4.5]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.4.3...v0.4.4
+[0.4.3]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.3.1...v0.4.3
 [0.3.1]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.2.9...v0.3.0
 [0.2.9]: https://github.com/brwinnov/vscode-hetzner-cloud/compare/v0.2.8...v0.2.9

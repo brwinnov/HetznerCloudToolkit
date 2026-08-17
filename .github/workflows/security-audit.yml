@@ -2,25 +2,34 @@ name: Security Audit
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   pull_request:
+  schedule:
+    - cron: '0 6 * * 1' # weekly, Monday 06:00 UTC — catch advisories published between commits
+
+concurrency:
+  group: audit-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Fail on high/critical vulnerabilities
+      - name: Fail on high/critical vulnerabilities (full tree)
         run: npm run audit:high
+
+      - name: Fail on moderate+ vulnerabilities (runtime tree)
+        run: npm audit --omit=dev --audit-level=moderate

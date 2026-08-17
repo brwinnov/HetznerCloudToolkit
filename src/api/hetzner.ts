@@ -293,7 +293,7 @@ export class HetznerClient {
   // ── Images ─────────────────────────────────────────────────────────────────
 
   async getImages(type?: string): Promise<HImage[]> {
-    const basePath = type ? `/images?type=${type}` : '/images';
+    const basePath = type ? `/images?type=${encodeURIComponent(type)}` : '/images';
     return this.paginateList<HImage>(basePath, 'images');
   }
 

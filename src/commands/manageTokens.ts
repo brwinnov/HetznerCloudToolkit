@@ -49,6 +49,17 @@ export function registerTokenCommands(
       });
       if (!name) return;
 
+      // Warn before silently overwriting an existing project's token
+      const existingProjects = await tokenManager.listProjects();
+      if (existingProjects.includes(name.trim())) {
+        const overwrite = await vscode.window.showWarningMessage(
+          `Project "${name.trim()}" already exists. Replace its stored API token?`,
+          { modal: true },
+          'Replace'
+        );
+        if (overwrite !== 'Replace') return;
+      }
+
       const token = await vscode.window.showInputBox({
         title: 'Hetzner API Token',
         prompt: 'Paste your Hetzner Cloud API token',

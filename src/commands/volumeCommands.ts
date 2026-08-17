@@ -36,8 +36,9 @@ export function registerVolumeCommands(
         prompt: 'Minimum 10 GB, maximum 10240 GB',
         value: '10',
         validateInput: (v) => {
-          const n = parseInt(v ?? '', 10);
-          if (isNaN(n) || n < 10 || n > 10240) return 'Must be a number between 10 and 10240';
+          if (!/^\d+$/.test((v ?? '').trim())) return 'Must be a whole number';
+          const n = parseInt(v!.trim(), 10);
+          if (n < 10 || n > 10240) return 'Must be a number between 10 and 10240';
           return undefined;
         },
       });
@@ -251,8 +252,9 @@ export function registerVolumeCommands(
         prompt: `Current size: ${item.volume.size} GB. Enter a new size (must be larger).`,
         value: String(item.volume.size),
         validateInput: (v) => {
-          const n = parseInt(v ?? '', 10);
-          if (isNaN(n) || n <= item.volume.size) return `Must be larger than current size (${item.volume.size} GB)`;
+          if (!/^\d+$/.test((v ?? '').trim())) return 'Must be a whole number';
+          const n = parseInt(v!.trim(), 10);
+          if (n <= item.volume.size) return `Must be larger than current size (${item.volume.size} GB)`;
           if (n > 10240) return 'Maximum volume size is 10240 GB';
           return undefined;
         },

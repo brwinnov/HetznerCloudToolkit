@@ -20,7 +20,6 @@ export class VolumeItem extends vscode.TreeItem {
         `Created: ${new Date(volume.created).toLocaleDateString()}`,
       ].join('\n\n')
     );
-    this.tooltip.isTrusted = true;
 
     this.iconPath = new vscode.ThemeIcon(
       attached ? 'database' : 'circle-outline',

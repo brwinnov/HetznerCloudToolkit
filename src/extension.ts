@@ -49,39 +49,22 @@ export async function activate(context: vscode.ExtensionContext) {
   const firewallsProvider = new FirewallsProvider(tokenManager);
   const volumesProvider = new VolumesProvider(tokenManager);
 
-  // Register tree views
-  vscode.window.createTreeView('hcloud.setup', {
-    treeDataProvider: setupProvider,
-    showCollapseAll: false,
-  });
-  vscode.window.createTreeView('hcloud.projects', {
-    treeDataProvider: projectsProvider,
-    showCollapseAll: false,
-  });
-  vscode.window.createTreeView('hcloud.servers', {
-    treeDataProvider: serversProvider,
-    showCollapseAll: false,
-  });
-  vscode.window.createTreeView('hcloud.networks', {
-    treeDataProvider: networksProvider,
-    showCollapseAll: false,
-  });
-  vscode.window.createTreeView('hcloud.images', {
-    treeDataProvider: imagesProvider,
-    showCollapseAll: false,
-  });
-  vscode.window.createTreeView('hcloud.sshKeys', {
-    treeDataProvider: sshKeysProvider,
-    showCollapseAll: false,
-  });
-  vscode.window.createTreeView('hcloud.firewalls', {
-    treeDataProvider: firewallsProvider,
-    showCollapseAll: false,
-  });
-  vscode.window.createTreeView('hcloud.volumes', {
-    treeDataProvider: volumesProvider,
-    showCollapseAll: false,
-  });
+  // Register tree views (disposables tracked in context.subscriptions)
+  context.subscriptions.push(
+    vscode.window.createTreeView('hcloud.setup', { treeDataProvider: setupProvider, showCollapseAll: false }),
+    vscode.window.createTreeView('hcloud.projects', { treeDataProvider: projectsProvider, showCollapseAll: false }),
+    vscode.window.createTreeView('hcloud.servers', { treeDataProvider: serversProvider, showCollapseAll: false }),
+    vscode.window.createTreeView('hcloud.networks', { treeDataProvider: networksProvider, showCollapseAll: false }),
+    vscode.window.createTreeView('hcloud.images', { treeDataProvider: imagesProvider, showCollapseAll: false }),
+    vscode.window.createTreeView('hcloud.sshKeys', { treeDataProvider: sshKeysProvider, showCollapseAll: false }),
+    vscode.window.createTreeView('hcloud.firewalls', { treeDataProvider: firewallsProvider, showCollapseAll: false }),
+    vscode.window.createTreeView('hcloud.volumes', { treeDataProvider: volumesProvider, showCollapseAll: false })
+  );
+
+  // Refresh Images (contributed toolbar button — was unregistered before 0.5.0)
+  context.subscriptions.push(
+    vscode.commands.registerCommand('hcloud.refreshImages', () => imagesProvider.refresh())
+  );
 
   // Status bar item — shows active project name
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);

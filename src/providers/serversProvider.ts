@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { HServer } from '../api/hetzner';
 import { TokenManager } from '../utils/secretStorage';
+import { ipv6HostFromPrefix } from '../utils/network';
 
 const TRANSIENT_STATES = new Set([
   'initializing', 'starting', 'stopping', 'rebuilding', 'migrating', 'deleting',
@@ -11,7 +12,9 @@ export class ServerItem extends vscode.TreeItem {
   constructor(public readonly server: HServer) {
     super(server.name, vscode.TreeItemCollapsibleState.None);
 
-    const ip = server.public_net.ipv4?.ip ?? server.public_net.ipv6?.ip ?? 'no ip';
+    // IPv6 is reported as a /64 prefix — show the conventional ::1 host address
+    const rawV6 = server.public_net.ipv6?.ip;
+    const ip = server.public_net.ipv4?.ip ?? (rawV6 ? (ipv6HostFromPrefix(rawV6) ?? rawV6) : 'no ip');
     this.description = `${ip} · ${server.server_type.name} · ${server.datacenter.location.name}`;
     this.tooltip = new vscode.MarkdownString(
       `**${server.name}**\n\nIP: \`${ip}\`\nType: ${server.server_type.name}\nCores: ${server.server_type.cores} | RAM: ${server.server_type.memory}GB\nLocation: ${server.datacenter.location.city}\nCreated: ${new Date(server.created).toLocaleDateString()}`

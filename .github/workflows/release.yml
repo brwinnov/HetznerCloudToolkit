@@ -1,0 +1,119 @@
+name: Release
+
+# Tag-triggered release, split into two jobs:
+#
+#   build    lint / typecheck / tests / VSIX package. Has NO access to any
+#            secret, so nothing that runs project code can read the PAT.
+#   publish  gated on the `marketplace-publish` GitHub Environment. Publishes the
+#            exact VSIX built above, then attaches it to a GitHub Release.
+#
+# SETUP REQUIRED: `VSCE_PAT` must be stored as an ENVIRONMENT secret on an
+# environment named `marketplace-publish` that has a required reviewer configured.
+# Storing it as a plain repository secret instead still works, but it would
+# also be readable by the build job and would NOT require approval.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      vsix: ${{ steps.meta.outputs.vsix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fail fast before any expensive step: a tag that disagrees with
+      # package.json would publish the wrong version number.
+      - name: Verify tag matches package.json version
+        id: meta
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          echo "tag=$tag  package.json=$pkg"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $pkg"
+            exit 1
+          fi
+          echo "vsix=$(node -p "require('./package.json').name")-$pkg.vsix" >> "$GITHUB_OUTPUT"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc -p tsconfig.json
+
+      - name: Production build
+        run: npm run build:prod
+
+      - name: Compile tests
+        run: npx tsc -p tsconfig.test.json
+
+      - name: Run tests (headless)
+        run: xvfb-run -a npm test
+
+      - name: Package VSIX
+        run: npx vsce package --no-dependencies
+
+      - name: Upload VSIX
+        uses: actions/upload-artifact@v7
+        with:
+          name: vsix
+          path: ${{ steps.meta.outputs.vsix }}
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: marketplace-publish
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      # Installed from the lockfile so vsce is the exact pinned version,
+      # rather than whatever `npx @vscode/vsce` would resolve at run time.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download VSIX built above
+        uses: actions/download-artifact@v8
+        with:
+          name: vsix
+
+      # VSCE_PAT is read from the environment by vsce itself; passing it as
+      # `--pat` would place the token in argv.
+      - name: Publish to VS Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: npx vsce publish --packagePath "${{ needs.build.outputs.vsix }}" --skip-duplicate
+
+      - name: Attach VSIX to GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: ${{ needs.build.outputs.vsix }}
+          generate_release_notes: true
