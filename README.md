@@ -16,6 +16,14 @@
 
 **[VS Marketplace (recommended)](https://marketplace.visualstudio.com/items?itemName=brwinnovvsce.vscode-hetzner-cloud)**
 
+## 💬 Feedback Welcome
+
+This extension is actively maintained — bug reports, feature requests, and ideas are genuinely welcome.
+
+- **Found a bug or have an idea?** [Open an issue](https://github.com/brwinnov/vscode-hetzner-cloud/issues)
+- **Using it and like it?** [Leave a rating on the Marketplace](https://marketplace.visualstudio.com/items?itemName=brwinnovvsce.vscode-hetzner-cloud&ssr=false#review-details) — it's the biggest single thing that helps others find this extension
+- General feedback and suggestions are just as welcome as bug reports — open an issue for any of it
+
 ---
 
 Hetzner Cloud Toolkit brings the Hetzner Cloud control panel into your editor. Create servers, manage networks, configure firewalls, and attach volumes — all without leaving VS Code.
@@ -98,7 +106,7 @@ Hetzner Cloud Toolkit brings the Hetzner Cloud control panel into your editor. C
 
 ## Requirements
 
-- VS Code **1.85.0** or later
+- VS Code **1.100.0** or later
 - A [Hetzner Cloud](https://www.hetzner.com/cloud) account and API token
 - No other dependencies — no Node modules are bundled at runtime
 
