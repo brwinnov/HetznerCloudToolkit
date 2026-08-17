@@ -28,12 +28,12 @@ jobs:
       vsix: ${{ steps.meta.outputs.vsix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
@@ -72,7 +72,7 @@ jobs:
         run: npx vsce package --no-dependencies
 
       - name: Upload VSIX
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vsix
           path: ${{ steps.meta.outputs.vsix }}
@@ -87,12 +87,12 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       # Installed from the lockfile so vsce is the exact pinned version,
@@ -101,7 +101,7 @@ jobs:
         run: npm ci
 
       - name: Download VSIX built above
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: vsix
 
@@ -113,7 +113,7 @@ jobs:
         run: npx vsce publish --packagePath "${{ needs.build.outputs.vsix }}" --skip-duplicate
 
       - name: Attach VSIX to GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ${{ needs.build.outputs.vsix }}
           generate_release_notes: true
