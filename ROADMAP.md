@@ -5,19 +5,27 @@
 
 ---
 
-## Status Snapshot — 2026-06-28
+## Status Snapshot — 2026-08-17
 
-- `v0.4.6` shipped as a combined security and test-hardening release (supersedes the unpublished `v0.4.5`).
-- Dependency remediation is complete, including forced major update for `esbuild`.
-- Current audit baseline is clean for both full dependency tree and runtime-only dependency tree.
-- All three `v0.4.6 — Security and Test Follow-ups` backlog items (below) are complete: project index storage hardening, SSH terminal IP validation, and regression test coverage (project-index parsing, SSH target validation, nonce helper output). Packaging was also fixed so the VSIX only ships the bundled `dist/extension.js`, not unbundled source or test output.
-- Next priority after release prep: deep code and security review of runtime paths.
+`v0.5.0` is live on the Marketplace. It was primarily a correctness and hardening release.
+
+**Dead commands fixed.** `hcloud.addSubnet` and `hcloud.refreshImages` were declared in `package.json` but never registered, so the Images refresh button and both Add Subnet entry points (tree context menu and network detail panel) threw *"command not found"*. Both now work.
+
+**Data-loss bug fixed.** Firewall rule deletion matched rules by content, so deleting one rule removed *every* rule with the same direction/protocol/port/IPs — rules differing only by description were destroyed together. Deletion is now index-based and removes exactly one rule.
+
+**IPv6-only servers can now SSH.** Hetzner reports IPv6 as a `/64` prefix, which failed IP validation outright. The conventional `::1` host address is now derived for SSH and display.
+
+**Security hardening.** Cloud-init templates warn when content looks like credentials (template storage is unencrypted); `hcloud.defaultRegion` is base64-transported into the WebView, closing a markup-injection path from a malicious workspace `.vscode/settings.json`; CSP meta tags and nonce handling tightened across WebViews; firewall CIDR input strictly validates; IP validation rebuilt on Node's `net.isIP`.
+
+**Toolchain and CI modernised.** TypeScript 5.9, ESLint 10 flat config, typescript-eslint 8, esbuild 0.28.2. Minimum VS Code raised to 1.100. CI now runs on Node 24 with a `ci.yml` gate on every push and PR, and an automated tag-triggered release pipeline (`release.yml`) that builds and tests with no secret access, then publishes behind a `marketplace-publish` environment approval gate.
+
+Full detail in the [`[0.5.0]` CHANGELOG entry](CHANGELOG.md).
 
 ---
 
-## Current State — v0.1.0
+## Current State — v0.5.0
 
-The initial release is feature-complete and marketplace-ready.
+Live on the Marketplace. Eight tree views in the sidebar — Setup, Projects, Servers, Networks, Images, SSH Keys, Firewalls and Volumes — backed by the Hetzner Cloud REST API v1.
 
 ```mermaid
 mindmap
@@ -32,15 +40,32 @@ mindmap
       Power on / off / reboot
       Delete with confirmation
       SSH terminal shortcut
+      Server Detail WebView
+      Live status polling
     Networks
       List with subnets
       Create / Delete
+      Add subnet
+      Network Detail WebView
+    Firewalls
+      Create default or empty
+      Add / Delete rules
+      Apply / Remove from servers
+    Volumes
+      Create with live locations
+      Attach / Detach
+      Resize
+      Delete with confirmation
+    Cloud-init
+      Named template library
+      Save / Load / Delete
+      Credential warning on save
     SSH Keys
       List with fingerprints
       Add / Delete
       Key generation guide
     Images
-      List system + snapshots
+      System, snapshot and app
     Onboarding
       SETUP panel task list
       SSH Key Guide WebView
@@ -60,6 +85,8 @@ graph TD
     C --> E[Networks TreeView]
     C --> F[Images TreeView]
     C --> G[SSH Keys TreeView]
+    C --> L[Firewalls TreeView]
+    C --> M[Volumes TreeView]
 
     A --> H[Server Wizard<br/>WebView]
     A --> I[SSH Key Guide<br/>WebView]
@@ -73,42 +100,47 @@ graph TD
 
 ## Release Plan
 
+Shipped releases, by actual release date:
+
 ```mermaid
 gantt
-    dateFormat  YYYY-MM
-    title Hetzner Cloud Toolkit — Release Timeline
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %Y
+    title Hetzner Cloud Toolkit — Shipped Releases
 
-    section v0.1.0 (Done)
-    Core extension & wizard      :done, 2026-02, 2026-03
-    Marketplace assets           :done, 2026-03, 2026-03
+    section Foundation
+    v0.1.0 core extension and 7-step wizard   :milestone, done, 2026-03-02, 0d
+    v0.2.0 marketplace assets and polish      :milestone, done, 2026-03-09, 0d
 
-    section v0.2.0
-    Auto-refresh after power ops :active, 2026-03, 1w
-    Server detail panel          :2026-03, 2w
-    Network subnets              :2026-03, 1w
+    section Resource coverage
+    v0.2.1 firewalls, volumes, detail panels  :milestone, done, 2026-03-09, 0d
+    v0.3.0 cloud-init library, polling        :milestone, done, 2026-03-10, 0d
+    v0.4.x scope trim, security hardening     :milestone, done, 2026-03-14, 0d
 
-    section v0.3.0
-    Cloud-init template library  :done, 2026-04, 2w
-    Server status polling        :done, 2026-04, 1w
-
-    section v1.0.0
-    Firewall CRUD                :2026-05, 3w
-    Volumes                      :2026-05, 2w
-    Load balancers               :2026-06, 3w
-    Marketplace publish          :2026-06, 1w
+    section Hardening
+    v0.4.6 packaging fix, regression tests    :milestone, done, 2026-06-28, 0d
+    v0.5.0 bug fixes, security, CI pipeline   :milestone, done, 2026-08-17, 0d
 ```
+
+### Remaining for v1.0.0
+
+| Feature | Status |
+|---------|--------|
+| **Load balancers** | The one substantial resource type with no UI. The API client layer already exists — `listLoadBalancers`, `getLoadBalancer`, `createLoadBalancer`, `deleteLoadBalancer`, `addTarget`, `removeTarget` and `load_balancer_types` are all implemented in `src/api/hetzner.ts`. A Load Balancers panel shipped in v0.2.1 and was removed in v0.4.0 when scope was trimmed, so re-adding it is a providers/commands/menus job rather than an API one. |
+
+Everything else from the original v1.0.0 list has shipped: firewall CRUD and volumes landed in v0.2.1, and Marketplace publication has been live since the early releases.
 
 ---
 
 ## Backlog
 
-### v0.4.7 or later — Hardening Follow-ups
+### Recently completed
 
-| # | Feature | Notes |
-|---|---------|-------|
-| 1 | **IPv6 validation edge case in `isValidIpAddress()`** | Regex accepts some malformed/incomplete IPv6 forms (e.g. `1:2:3` without `::` compression). Non-security: the validator's character set still blocks any shell metacharacters, so there's no injection path — this is defense-in-depth correctness only, not urgent. |
+| Feature | Notes |
+|---------|-------|
+| **IPv6 validation edge case in `isValidIpAddress()`** | ✅ Fixed in v0.5.0. The old regex accepted malformed/incomplete IPv6 forms such as `1:2:3` without `::` compression. `src/utils/network.ts` was rewritten on Node's `net.isIP`, and the fix is covered by the regression suite. This was always defense-in-depth rather than a security hole — the validator's character set blocked shell metacharacters, so no injection path existed. |
 
-### v0.2.0 — Polish
+### v0.2.0 — Polish *(delivered)*
 
 | # | Feature | Notes |
 |---|---------|-------|
@@ -117,21 +149,21 @@ gantt
 | 3 | **Network subnets** | Expand network node to show subnets; add/remove subnet commands |
 | 4 | **SSH key auto-select after add in wizard** | Newly added key pre-selected when wizard step reloads |
 
-### v0.3.0 — Productivity
+### v0.3.0 — Productivity *(delivered)*
 
 | # | Feature | Notes |
 |---|---------|-------|
-| 5 | **Cloud-init template library** | Save/load named templates via SecretStorage |
+| 5 | **Cloud-init template library** | Save/load named templates |
 | 6 | **Server status polling** | Poll while `initializing`, update tree icon live |
 
 ### v1.0.0 — Full Coverage
 
 | # | Feature | Notes |
 |---|---------|-------|
-| 8 | **Firewall rules CRUD** | List, create, apply, delete Hetzner Firewalls |
-| 9 | **Volumes** | Block storage attach / detach |
-| 10 | **Load balancers** | Basic CRUD |
-| 11 | **Marketplace publish** | `vsce package` + `vsce publish` — assets already ready |
+| 8 | **Firewall rules CRUD** | ✅ Delivered in v0.2.1 |
+| 9 | **Volumes** | ✅ Delivered in v0.2.1 |
+| 10 | **Load balancers** | Still open — see *Remaining for v1.0.0* above |
+| 11 | **Marketplace publish** | ✅ Delivered; now automated via `release.yml` behind an approval gate |
 
 ### Future Ideas
 
@@ -148,6 +180,6 @@ gantt
 ## Contributing
 
 Contributions, bug reports, and feature requests are welcome.
-Open an [issue](https://github.com/brwinnov/vscode-hetzner-cloud/issues) or submit a PR.
+Open an [issue](https://github.com/brwinnov/HetznerCloudToolkit/issues) or submit a PR.
 
 This extension uses **no external runtime dependencies** — just native `fetch` and the VS Code API.

@@ -24,7 +24,10 @@ export class WelcomePage {
       WelcomePage.panel = undefined;
     });
 
-    panel.webview.html = getWelcomeHtml(generateNonce());
+    // Read the version from the extension manifest rather than hardcoding it,
+    // so the footer can never drift out of date across releases.
+    const { version } = context.extension.packageJSON as { version?: string };
+    panel.webview.html = getWelcomeHtml(generateNonce(), version ? `v${version}` : '');
 
     panel.webview.onDidReceiveMessage(async (msg) => {
       switch (msg.command) {
@@ -35,7 +38,7 @@ export class WelcomePage {
           await vscode.commands.executeCommand('hcloud.sshKeyGuide');
           break;
         case 'openDocs':
-          vscode.env.openExternal(vscode.Uri.parse('https://github.com/brwinnov/vscode-hetzner-cloud#readme'));
+          vscode.env.openExternal(vscode.Uri.parse('https://github.com/brwinnov/HetznerCloudToolkit#readme'));
           break;
         case 'openHetznerConsole':
           vscode.env.openExternal(vscode.Uri.parse('https://console.hetzner.cloud'));
@@ -57,7 +60,7 @@ export class WelcomePage {
   }
 }
 
-function getWelcomeHtml(nonce: string): string {
+function getWelcomeHtml(nonce: string, versionLabel: string): string {
   return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -525,10 +528,10 @@ function getWelcomeHtml(nonce: string): string {
 
 <!-- ── Footer ── -->
 <div class="footer">
-  <a href="https://github.com/brwinnov/vscode-hetzner-cloud" target="_blank">GitHub Repository</a>
-  <a href="https://github.com/brwinnov/vscode-hetzner-cloud/issues" target="_blank">Report an Issue</a>
+  <a href="https://github.com/brwinnov/HetznerCloudToolkit" target="_blank">GitHub Repository</a>
+  <a href="https://github.com/brwinnov/HetznerCloudToolkit/issues" target="_blank">Report an Issue</a>
   <a href="https://docs.hetzner.cloud" target="_blank">Hetzner Cloud API Docs</a>
-  <span style="margin-left:auto;color:var(--vscode-descriptionForeground)">Hetzner Cloud Toolkit v0.1.0 — Not affiliated with Hetzner Online GmbH</span>
+  <span style="margin-left:auto;color:var(--vscode-descriptionForeground)">Hetzner Cloud Toolkit ${versionLabel} — Not affiliated with Hetzner Online GmbH</span>
 </div>
 
 <script nonce="${nonce}">

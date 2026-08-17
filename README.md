@@ -20,7 +20,7 @@
 
 This extension is actively maintained — bug reports, feature requests, and ideas are genuinely welcome.
 
-- **Found a bug or have an idea?** [Open an issue](https://github.com/brwinnov/vscode-hetzner-cloud/issues)
+- **Found a bug or have an idea?** [Open an issue](https://github.com/brwinnov/HetznerCloudToolkit/issues)
 - **Using it and like it?** [Leave a rating on the Marketplace](https://marketplace.visualstudio.com/items?itemName=brwinnovvsce.vscode-hetzner-cloud&ssr=false#review-details) — it's the biggest single thing that helps others find this extension
 - General feedback and suggestions are just as welcome as bug reports — open an issue for any of it
 
@@ -122,7 +122,7 @@ Hetzner Cloud Toolkit brings the Hetzner Cloud control panel into your editor. C
 
 ## Contributing
 
-Issues and PRs welcome at [github.com/brwinnov/vscode-hetzner-cloud](https://github.com/brwinnov/vscode-hetzner-cloud).
+Issues and PRs welcome at [github.com/brwinnov/HetznerCloudToolkit](https://github.com/brwinnov/HetznerCloudToolkit).
 
 ---
 

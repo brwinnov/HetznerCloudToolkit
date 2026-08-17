@@ -13,7 +13,7 @@
 Please **do not** open a public issue for security vulnerabilities.
 
 Report privately via **GitHub Private Vulnerability Reporting**:
-[github.com/brwinnov/vscode-hetzner-cloud/security/advisories/new](https://github.com/brwinnov/vscode-hetzner-cloud/security/advisories/new)
+[github.com/brwinnov/HetznerCloudToolkit/security/advisories/new](https://github.com/brwinnov/HetznerCloudToolkit/security/advisories/new)
 
 Expected response: acknowledgment within **72 hours**, fix or mitigation plan within **90 days** (faster for anything affecting API token handling).
 
