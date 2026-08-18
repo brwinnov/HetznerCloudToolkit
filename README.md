@@ -104,7 +104,7 @@ Hetzner Cloud Toolkit brings the Hetzner Cloud control panel into your editor. C
 
 ## Requirements
 
-- VS Code **1.100.0** or later
+- VS Code Current Release
 - A [Hetzner Cloud](https://www.hetzner.com/cloud) account and API token
 - No other dependencies — no Node modules are bundled at runtime
 
