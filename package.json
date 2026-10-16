@@ -1,7 +1,7 @@
 {
   "name": "vscode-hetzner-cloud",
   "displayName": "Hetzner Cloud Toolkit",
-  "description": "Manage Hetzner Cloud infrastructure directly from VS Code \u2014 servers, networks, SSH keys, Tailscale and more",
+  "description": "Manage Hetzner Cloud infrastructure directly from VS Code — servers, networks, SSH keys, Tailscale and more",
   "version": "0.5.0",
   "publisher": "brwinnovvsce",
   "engines": {
@@ -636,7 +636,7 @@
     "@types/vscode": "1.100.0",
     "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^3.1.0",
-    "@vscode/vsce": "^3.9.2",
+    "@vscode/vsce": "^4.0.0",
     "esbuild": "^0.28.2",
     "eslint": "^10.8.1",
     "prettier": "^3.9.6",
