@@ -15,9 +15,14 @@ export class ServerItem extends vscode.TreeItem {
     // IPv6 is reported as a /64 prefix — show the conventional ::1 host address
     const rawV6 = server.public_net.ipv6?.ip;
     const ip = server.public_net.ipv4?.ip ?? (rawV6 ? (ipv6HostFromPrefix(rawV6) ?? rawV6) : 'no ip');
-    this.description = `${ip} · ${server.server_type.name} · ${server.datacenter.location.name}`;
+    // Hetzner can return a server mid-transition (e.g. migrating between datacenters)
+    // with datacenter/server_type fields temporarily absent — don't let that crash the tree.
+    const locationName = server.datacenter?.location?.name ?? 'unknown location';
+    const locationCity = server.datacenter?.location?.city ?? 'unknown location';
+    const typeName = server.server_type?.name ?? 'unknown type';
+    this.description = `${ip} · ${typeName} · ${locationName}`;
     this.tooltip = new vscode.MarkdownString(
-      `**${server.name}**\n\nIP: \`${ip}\`\nType: ${server.server_type.name}\nCores: ${server.server_type.cores} | RAM: ${server.server_type.memory}GB\nLocation: ${server.datacenter.location.city}\nCreated: ${new Date(server.created).toLocaleDateString()}`
+      `**${server.name}**\n\nIP: \`${ip}\`\nType: ${typeName}\nCores: ${server.server_type?.cores ?? '?'} | RAM: ${server.server_type?.memory ?? '?'}GB\nLocation: ${locationCity}\nCreated: ${new Date(server.created).toLocaleDateString()}`
     );
 
     this.iconPath = new vscode.ThemeIcon(

@@ -267,18 +267,18 @@ function renderHtml(s: HServer): string {
 <div class="section">
   <div class="section-title">Specification</div>
   <table>
-    ${row('Server type', s.server_type.name)}
-    ${row('CPU cores',   String(s.server_type.cores))}
-    ${row('RAM',         `${s.server_type.memory} GB`)}
-    ${row('Disk',        `${s.server_type.disk} GB`)}
+    ${row('Server type', s.server_type?.name ?? 'unknown')}
+    ${row('CPU cores',   String(s.server_type?.cores ?? '?'))}
+    ${row('RAM',         s.server_type ? `${s.server_type.memory} GB` : 'unknown')}
+    ${row('Disk',        s.server_type ? `${s.server_type.disk} GB` : 'unknown')}
   </table>
 </div>
 
 <div class="section">
   <div class="section-title">Location</div>
   <table>
-    ${row('Datacenter', s.datacenter.name)}
-    ${row('Location',   `${s.datacenter.location.city} (${s.datacenter.location.name})`)}
+    ${row('Datacenter', s.datacenter?.name ?? 'unknown')}
+    ${row('Location',   s.datacenter?.location ? `${s.datacenter.location.city} (${s.datacenter.location.name})` : 'unknown')}
   </table>
 </div>
 

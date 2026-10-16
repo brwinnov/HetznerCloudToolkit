@@ -85,7 +85,7 @@ export function registerVolumeCommands(
           return;
         }
         const localServers = servers.filter(
-          (s) => s.datacenter.location.name === locationPick.label
+          (s) => s.datacenter?.location?.name === locationPick.label
         );
         if (localServers.length === 0) {
           vscode.window.showWarningMessage(
@@ -176,7 +176,7 @@ export function registerVolumeCommands(
       }
 
       const localServers = servers.filter(
-        (s) => s.datacenter.location.name === item.volume.location.name
+        (s) => s.datacenter?.location?.name === item.volume.location.name
       );
 
       if (localServers.length === 0) {
