@@ -5,6 +5,23 @@ import { suite, test } from 'mocha';
 import { TokenManager } from '../utils/secretStorage';
 import { isValidIpAddress, isValidCidr, ipv6HostFromPrefix } from '../utils/network';
 import { generateNonce } from '../utils/nonce';
+import { ServerItem } from '../providers/serversProvider';
+import type { HServer } from '../api/hetzner';
+
+function makeServer(overrides: Partial<HServer> = {}): HServer {
+  return {
+    id: 1,
+    name: 'test-server',
+    status: 'running',
+    public_net: { ipv4: { ip: '1.2.3.4' }, ipv6: null },
+    server_type: { name: 'cx22', cores: 2, memory: 4, disk: 40 },
+    datacenter: { name: 'fsn1-dc14', location: { name: 'fsn1', city: 'Falkenstein' } },
+    image: null,
+    created: '2026-01-01T00:00:00Z',
+    labels: {},
+    ...overrides,
+  };
+}
 
 class MockSecretStorage {
   private readonly storeMap = new Map<string, string>();
@@ -128,6 +145,25 @@ suite('Regression tests', () => {
       assert.notStrictEqual(nonceA, nonceB);
       assert.match(nonceA, /^[A-Za-z0-9+/]+=*$/);
       assert.match(nonceB, /^[A-Za-z0-9+/]+=*$/);
+    });
+  });
+
+  suite('ServerItem resilience to missing datacenter/server_type (#6)', () => {
+    test('renders normally when both fields are present', () => {
+      const item = new ServerItem(makeServer());
+      assert.match(item.description as string, /fsn1/);
+    });
+
+    test('falls back instead of throwing when datacenter is absent', () => {
+      assert.doesNotThrow(() => new ServerItem(makeServer({ datacenter: undefined })));
+      const item = new ServerItem(makeServer({ datacenter: undefined }));
+      assert.match(item.description as string, /unknown location/);
+    });
+
+    test('falls back instead of throwing when server_type is absent', () => {
+      assert.doesNotThrow(() => new ServerItem(makeServer({ server_type: undefined })));
+      const item = new ServerItem(makeServer({ server_type: undefined }));
+      assert.match(item.description as string, /unknown type/);
     });
   });
 });

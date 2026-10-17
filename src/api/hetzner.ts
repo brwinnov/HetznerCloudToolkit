@@ -19,8 +19,10 @@ export interface HServer {
     ipv4: { ip: string } | null;
     ipv6: { ip: string } | null;
   };
-  server_type: { name: string; cores: number; memory: number; disk: number };
-  datacenter: { name: string; location: { name: string; city: string } };
+  // Observed absent on some servers (see #6) despite the Hetzner API docs
+  // describing these as always-present — treat as optional everywhere.
+  server_type?: { name: string; cores: number; memory: number; disk: number };
+  datacenter?: { name: string; location: { name: string; city: string } };
   image: { name: string; description: string } | null;
   created: string;
   labels: Record<string, string>;
