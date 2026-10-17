@@ -14,7 +14,10 @@
 
 ## Install
 
-**[VS Marketplace (recommended)](https://marketplace.visualstudio.com/items?itemName=brwinnovvsce.vscode-hetzner-cloud)**
+3 Sources:
+1. [GitHub Repo Release section](https://github.com/brwinnov/HetznerCloudToolkit/releases)
+2. [Open VSX](https://open-vsx.org/extension/brwinnovvsce/vscode-hetzner-cloud)
+3. [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=brwinnovvsce.vscode-hetzner-cloud)
 
 ## 💬 Feedback Welcome
 
