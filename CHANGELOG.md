@@ -10,6 +10,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.1] - 2026-10-17
+
+### Fixed
+- Servers tree, server detail panel, and volume-attach location matching could crash with *"Cannot read properties of undefined (reading 'location')"* if the Hetzner API ever returned a server with `datacenter` or `server_type` fields absent — one malformed server took down the whole list instead of just that row (#6)
+
+### Security
+- Bumped transitive dependencies to clear advisories flagged by the weekly audit: `fast-uri`, `js-yaml`, `qs`, `brace-expansion`, `undici`, `markdown-it`; `@vscode/vsce` bumped 3.9.2 → 4.0.0 to clear a `braces` advisory in its dependency tree (dev-tooling only — nothing shipped in the packaged extension was affected)
+
+---
+
 ## [0.5.0] - 2026-08-17
 
 ### Fixed
@@ -246,7 +256,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Status bar item** — shows active project name; click to switch
 - **First-use onboarding** — SSH key guide prompt on first project add; Welcome page on install
 
-[Unreleased]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.4.6...v0.5.0
 [0.4.6]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.4.4...v0.4.6
 [0.4.5]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.4.4...v0.4.5
