@@ -8,8 +8,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [0.5.2] - 2026-10-17
+
 ### Changed
-- Releases now also publish to [Open VSX](https://open-vsx.org) (for VSCodium, Gitpod, Cursor, etc.), ahead of the Microsoft Marketplace, via a new `ovsx publish` step in the release workflow
+- Releases now also publish to [Open VSX](https://open-vsx.org) (for VSCodium, Gitpod, Cursor, etc.), ahead of the Microsoft Marketplace, via a new `ovsx publish` step in the release workflow — v0.5.1 was Marketplace-only; this is the first version also on Open VSX
 
 ---
 
@@ -259,7 +263,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Status bar item** — shows active project name; click to switch
 - **First-use onboarding** — SSH key guide prompt on first project add; Welcome page on install
 
-[Unreleased]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.4.6...v0.5.0
 [0.4.6]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.4.4...v0.4.6
