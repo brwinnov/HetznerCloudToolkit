@@ -7,10 +7,10 @@ name: Release
 #   publish  gated on the `marketplace-publish` GitHub Environment. Publishes the
 #            exact VSIX built above, then attaches it to a GitHub Release.
 #
-# SETUP REQUIRED: `VSCE_PAT` must be stored as an ENVIRONMENT secret on an
-# environment named `marketplace-publish` that has a required reviewer configured.
-# Storing it as a plain repository secret instead still works, but it would
-# also be readable by the build job and would NOT require approval.
+# SETUP REQUIRED: `VSCE_PAT` and `OVSX_PAT` must be stored as ENVIRONMENT secrets
+# on an environment named `marketplace-publish` that has a required reviewer
+# configured. Storing them as plain repository secrets instead still works, but
+# they would also be readable by the build job and would NOT require approval.
 
 on:
   push:
@@ -104,6 +104,14 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: vsix
+
+      # OVSX_PAT is read from the environment by ovsx itself; passing it as
+      # `--pat` would place the token in argv. Published ahead of the
+      # Microsoft Marketplace below, by preference.
+      - name: Publish to Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: npx ovsx publish --packagePath "${{ needs.build.outputs.vsix }}" --skip-duplicate
 
       # VSCE_PAT is read from the environment by vsce itself; passing it as
       # `--pat` would place the token in argv.

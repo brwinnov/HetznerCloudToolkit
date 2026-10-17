@@ -8,6 +8,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Releases now also publish to [Open VSX](https://open-vsx.org) (for VSCodium, Gitpod, Cursor, etc.), ahead of the Microsoft Marketplace, via a new `ovsx publish` step in the release workflow
+
 ---
 
 ## [0.5.1] - 2026-10-17
