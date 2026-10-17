@@ -27,3 +27,6 @@ eslint.config.mjs
 .prettierrc*
 .editorconfig
 **/.DS_Store
+*.jpg
+*.jpeg
+*.bak

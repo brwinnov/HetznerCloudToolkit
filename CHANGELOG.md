@@ -10,6 +10,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.3] - 2026-10-17
+
+### Changed
+- New extension icon/logo
+
+---
+
 ## [0.5.2] - 2026-10-17
 
 ### Changed
@@ -263,7 +270,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Status bar item** — shows active project name; click to switch
 - **First-use onboarding** — SSH key guide prompt on first project add; Welcome page on install
 
-[Unreleased]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/brwinnov/HetznerCloudToolkit/compare/v0.4.6...v0.5.0
