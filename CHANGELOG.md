@@ -8,6 +8,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+- Patched a high-severity MSAL Node authorization-code-flow advisory (`@azure/msal-node`, pulled in transitively via `@vscode/vsce` → `@azure/identity`) via `npm audit fix` — dev-tooling only, nothing shipped in the packaged extension was affected
+- Patched 17 moderate-severity advisories (`minimatch` globparts-amplification DoS, `glob` AbortSignal cancellation bypass) chained through eslint/typescript-eslint/`@vscode/vsce`/`ovsx`'s own dependency trees. `npm audit fix --force` would have resolved these only by downgrading `eslint` to a pre-flat-config v4 and `ovsx` to 0.7.0 — both unacceptable — so `minimatch`/`glob` are now pinned tree-wide via `package.json` `overrides` instead, leaving every root dev-tooling package at its current version. `npm audit` now reports 0 vulnerabilities
+
 ---
 
 ## [0.5.3] - 2026-10-17
